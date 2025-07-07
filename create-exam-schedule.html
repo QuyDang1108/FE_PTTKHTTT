@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý lịch thi</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        background-color: #f8f9fc;
+        font-family: "Nunito Sans", sans-serif;
+      }
+      .sidebar {
+        height: 100vh;
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+      }
+      .card-rounded {
+        border-radius: 1rem;
+      }
+      tr.selected {
+        background-color: #e2e6ff !important;
+        font-weight: bold;
+      }
+      button {
+        border-radius: 12px !important;
+        background-color: #6183ff !important;
+        color: white !important;
+        width: 114.12px !important;
+        height: 44.53px !important;
+      }
+      label {
+        font-size: 16px;
+      }
+      .custom-input {
+        background-color: #f5f6fa !important;
+        color: #00000080 !important;
+        border: none;
+      }
+
+      .custom-input::placeholder {
+        color: #00000080;
+      }
+
+      .custom-input:focus {
+        background-color: #f5f6fa;
+        box-shadow: none;
+        outline: none;
+      }
+      .full {
+        color: #21d247;
+        font-size: 14px;
+      }
+      .opening {
+        color: #b3c022;
+        font-size: 14px;
+      }
+      .expired {
+        color: #cb0202;
+        font-size: 14px;
+      }
+      .menu-button {
+        background-color: white !important;
+        color: black !important;
+        border: none;
+      }
+
+      .menu-button.selected {
+        background-color: #4f75ff !important;
+        color: white !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar p-3">
+          <h4 class="fw-bold text-primary text-center">
+            Dash<span class="text-dark">Stack</span>
+          </h4>
+          <button
+            class="menu-button selected btn btn-primary w-100 text-start ps-1 mb-1"
+          >
+            <i class="bi bi-clock me-2 ms-3"></i>Quản lý lịch thi
+          </button>
+          <hr />
+          <button
+            class="menu-button btn btn-primary w-100 text-start ps-1 mb-1"
+          >
+            <i class="bi bi-power ms-3 me-3"></i>Logout
+          </button>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-10 p-0 m-0">
+          <div
+            class="d-flex align-items-center"
+            style="background-color: white; height: 81px"
+          >
+            <h3>Xin chào, quản lý</h3>
+          </div>
+          <h4 class="mt-3 ms-4">Quản lý lịch thi</h4>
+
+          <div class="row m-4">
+            <!-- Danh sách lịch thi -->
+            <div class="col-md-12" id="schedule-list">
+              <div class="card card-rounded p-3">
+                <div
+                  class="d-flex justify-content-between align-items-center mb-3"
+                >
+                  <h5 class="fw-bold">Danh sách lịch thi</h5>
+                  <div>
+                    <button
+                      class="btn btn-outline-primary btn-sm"
+                      onclick="openEditForm()"
+                    >
+                      Chỉnh sửa
+                    </button>
+                    <button
+                      class="btn btn-primary btn-sm"
+                      onclick="openAddForm()"
+                    >
+                      Thêm lịch thi
+                    </button>
+                  </div>
+                </div>
+                <table class="table table-bordered text-center" id="exam-table">
+                  <thead>
+                    <tr>
+                      <th class="fs-6">Tên kỳ thi</th>
+                      <th class="fs-6">Loại chứng chỉ</th>
+                      <th class="fs-6">Ngày thi</th>
+                      <th class="fs-6">Giờ thi</th>
+                      <th class="fs-6">Phòng thi</th>
+                      <th class="fs-6">Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr onclick="selectRow(this)">
+                      <td>Tin học văn phòng</td>
+                      <td>Tin học</td>
+                      <td>22/03/2025</td>
+                      <td>08:00 AM</td>
+                      <td>P.317</td>
+                      <td>
+                        <span class="full">Đã đủ</span>
+                      </td>
+                    </tr>
+                    <tr onclick="selectRow(this)">
+                      <td>Tin học văn phòng</td>
+                      <td>Tin học</td>
+                      <td>22/03/2025</td>
+                      <td>08:00 AM</td>
+                      <td>P.317</td>
+                      <td>
+                        <span class="expired">Đã hết hạn</span>
+                      </td>
+                    </tr>
+                    <tr onclick="selectRow(this)">
+                      <td>Tin học văn phòng</td>
+                      <td>Tin học</td>
+                      <td>22/03/2025</td>
+                      <td>08:00 AM</td>
+                      <td>P.317</td>
+                      <td>
+                        <span class="opening">Đang mở</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Form thêm và chỉnh sửa -->
+            <div class="col-md-4 d-none" id="form-container">
+              <div class="card card-rounded p-3">
+                <div class="d-flex justify-content-end align-items-center">
+                  <svg
+                    onclick="closeForm()"
+                    style="cursor: pointer"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="30"
+                    height="30"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
+                </div>
+                <div
+                  class="d-flex justify-content-between align-items-center mb-3"
+                >
+                  <h5 class="fw-bold" style="font-size: 28px" id="form-title">
+                    Thêm lịch thi
+                  </h5>
+                </div>
+                <form id="exam-form">
+                  <div class="row">
+                    <div class="col-md-12 mb-3">
+                      <label class="form-label fw-bold">Tên kỳ thi</label>
+                      <input
+                        type="text"
+                        class="form-control custom-input"
+                        id="exam-name"
+                      />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">Loại chứng chỉ</label>
+                      <select class="form-select custom-input" id="exam-type">
+                        <option>Ngoại ngữ</option>
+                        <option>Tin học</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold"
+                        >Giới hạn thí sinh</label
+                      >
+                      <input
+                        type="number"
+                        class="form-control custom-input"
+                        id="exam-limit"
+                      />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">Ngày thi</label>
+                      <input
+                        type="date"
+                        class="form-control custom-input"
+                        id="exam-date"
+                      />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">Giờ thi</label>
+                      <input
+                        type="time"
+                        class="form-control custom-input"
+                        id="exam-time"
+                      />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-bold">Phòng thi</label>
+                      <input
+                        type="text"
+                        class="form-control custom-input"
+                        id="exam-room"
+                      />
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-center">
+                    <button
+                      type="submit"
+                      class="btn btn-custom"
+                      id="btn-submit"
+                    >
+                      Thêm
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let selectedRow = null;
+
+      function selectRow(row) {
+        document
+          .querySelectorAll("#exam-table tbody tr")
+          .forEach((tr) => tr.classList.remove("selected"));
+        row.classList.add("selected");
+        selectedRow = row;
+      }
+
+      document.querySelectorAll(".menu-button").forEach((button) => {
+        button.addEventListener("click", function () {
+          document
+            .querySelectorAll(".menu-button")
+            .forEach((btn) => btn.classList.remove("selected"));
+          this.classList.add("selected");
+        });
+      });
+
+      function openAddForm() {
+        document.getElementById("form-title").innerText = "Thêm lịch thi";
+        document.getElementById("exam-form").reset();
+
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("exam-date").value = today;
+
+        document.getElementById("exam-limit").value = 20;
+        document.getElementById("exam-time").value = "08:00";
+        document.getElementById("btn-submit").innerText = "Thêm";
+        document.getElementById("form-container").classList.remove("d-none");
+        document
+          .getElementById("schedule-list")
+          .classList.replace("col-md-12", "col-md-8");
+      }
+
+      function openEditForm() {
+        if (!selectedRow) return alert("Vui lòng chọn một dòng để chỉnh sửa");
+        const cells = selectedRow.querySelectorAll("td");
+        document.getElementById("exam-name").value = cells[0].innerText;
+        document.getElementById("exam-type").value = cells[1].innerText;
+        document.getElementById("exam-date").value = formatDate(
+          cells[2].innerText
+        );
+        document.getElementById("exam-time").value = formatTime(
+          cells[3].innerText
+        );
+        document.getElementById("exam-room").value = cells[4].innerText;
+        document.getElementById("btn-submit").innerText = "Chỉnh sửa";
+        document.getElementById("form-title").innerText = "Chỉnh sửa lịch thi";
+        document.getElementById("form-container").classList.remove("d-none");
+        document
+          .getElementById("schedule-list")
+          .classList.replace("col-md-12", "col-md-8");
+      }
+
+      function closeForm() {
+        document.getElementById("form-container").classList.add("d-none");
+        document
+          .getElementById("schedule-list")
+          .classList.replace("col-md-8", "col-md-12");
+      }
+
+      function formatDate(dateStr) {
+        const [day, month, year] = dateStr.split("/");
+        return `${year}-${month}-${day}`;
+      }
+
+      function formatTime(timeStr) {
+        const [time, meridian] = timeStr.split(" ");
+        let [hours, minutes] = time.split(":");
+        if (meridian === "PM" && hours !== "12") hours = parseInt(hours) + 12;
+        if (meridian === "AM" && hours === "12") hours = "00";
+        return `${hours}:${minutes}`;
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

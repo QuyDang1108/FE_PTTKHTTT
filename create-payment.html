@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý thanh toán</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <style>
+      body {
+        background-color: #f8f9fc;
+        font-family: "Nunito Sans", sans-serif;
+      }
+      .sidebar {
+        height: 100vh;
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+      }
+      .card-rounded {
+        border-radius: 1rem;
+      }
+      .status-paid {
+        color: #21d247 !important;
+      }
+      .status-unpaid {
+        color: #b3c022 !important;
+      }
+      .menu-button {
+        background-color: white !important;
+        color: black !important;
+        border: none;
+      }
+      .menu-button.selected {
+        background-color: #4f75ff !important;
+        color: white !important;
+      }
+      button {
+        border-radius: 12px !important;
+        background-color: #6183ff !important;
+        color: white !important;
+        width: 114.12px !important;
+        height: 44.53px !important;
+      }
+      .search-box {
+        background-color: #f8f9fc !important; /* Màu nền xanh nhạt */
+        border: 1px solid #ccc;
+        padding: 8px 12px;
+        border-radius: 14px;
+        color: #202224; /* Màu chữ */
+        width: 90%;
+      }
+      table td,
+      table th {
+        line-height: 40px;
+      }
+      .custom-select {
+        width: 160px;
+        height: 40px;
+        font-size: 14px;
+      }
+      a {
+        all: unset;
+        cursor: pointer; /* giữ lại con trỏ tay để biết có thể bấm */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar p-3">
+          <h4 class="fw-bold text-primary text-center">
+            Dash<span class="text-dark">Stack</span>
+          </h4>
+          <button
+            class="menu-button btn btn-primary w-100 text-start ps-1 mb-1"
+          >
+            <i class="bi bi-border-all card-rounded me-2 ms-3"></i>Xem phiếu
+            đăng ký
+          </button>
+          <button
+            class="menu-button selected btn btn-primary w-100 text-start ps-1 mb-1 selected"
+          >
+            <i class="bi bi-chat-left me-2 ms-3"></i>
+            Quản lý thanh toán
+          </button>
+          <hr />
+          <button
+            class="menu-button btn btn-primary w-100 text-start ps-1 mb-1"
+          >
+            <i class="bi bi-power ms-3 me-3"></i>Logout
+          </button>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-10 p-0 m-0">
+          <div
+            class="d-flex align-items-center"
+            style="background-color: white; height: 81px"
+          >
+            <h3 class="ms-4">Xin chào, nhân viên kế toán</h3>
+          </div>
+
+          <div class="mt-3 ms-4">
+            <h4 class="fw-bold">Quản lý thanh toán</h4>
+          </div>
+
+          <div class="m-4">
+            <div class="card card-rounded p-3">
+              <input
+                type="text"
+                class="form-control mb-3 search-box"
+                placeholder="Search"
+              />
+              <table class="table text-center">
+                <thead>
+                  <tr>
+                    <th>Mã ĐK</th>
+                    <th>Tên ĐK</th>
+                    <th>Địa chỉ</th>
+                    <th>Số điện thoại</th>
+                    <th>Email</th>
+                    <th>Mã phiếu đăng ký</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><a href="./create-payment2.html">00001</a></td>
+                    <td>Nguyen Van A</td>
+                    <td>Nguyen Van Cu, Q5</td>
+                    <td>+847321141</td>
+                    <td>abc@gmail.com</td>
+                    <td>PH0001</td>
+                    <td class="d-flex justify-content-center">
+                      <span class="status-text"></span>
+                      <select class="form-select custom-select d-none">
+                        <option class="status-unpaid">Chưa thanh toán</option>
+                        <option class="status-paid">Đã thanh toán</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><a href="./create-payment2.html">00001</a></td>
+                    <td>Nguyen Van A</td>
+                    <td>Nguyen Van Cu, Q5</td>
+                    <td>+847321141</td>
+                    <td>abc@gmail.com</td>
+                    <td>PH0002</td>
+                    <td class="d-flex justify-content-center">
+                      <span class="status-text"></span>
+                      <select class="form-select custom-select d-none">
+                        <option class="status-unpaid">Chưa thanh toán</option>
+                        <option class="status-paid">Đã thanh toán</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><a href="./create-payment2.html">00001</a></td>
+                    <td>Nguyen Van A</td>
+                    <td>Nguyen Van Cu, Q5</td>
+                    <td>+847321141</td>
+                    <td>abc@gmail.com</td>
+                    <td>PH0003</td>
+                    <td class="d-flex justify-content-center">
+                      <span class="status-text"></span>
+                      <select class="form-select custom-select d-none">
+                        <option class="status-unpaid">Chưa thanh toán</option>
+                        <option class="status-paid">Đã thanh toán</option>
+                      </select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="text-end">
+                <button
+                  class="btn btn-primary btn-sm"
+                  style="
+                    width: 274px !important;
+                    font-size: 18px !important;
+                    height: 56px !important;
+                  "
+                >
+                  Cập nhật trạng thái thanh toán
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const selects = document.querySelectorAll("select.form-select");
+
+        selects.forEach((select) => {
+          const applySelectedClass = () => {
+            select.classList.remove("status-unpaid", "status-paid");
+            const selectedOption = select.options[select.selectedIndex];
+            selectedOption.classList.forEach((cls) => {
+              if (cls.startsWith("status-")) {
+                select.classList.add(cls);
+              }
+            });
+          };
+          applySelectedClass();
+        });
+
+        const updateBtn = document.querySelector(".btn.btn-primary.btn-sm");
+        let isEditing = false;
+
+        updateBtn.addEventListener("click", function () {
+          const rows = document.querySelectorAll("tbody tr");
+
+          if (!isEditing) {
+            // Chuyển sang chế độ cập nhật
+            rows.forEach((row) => {
+              const td = row.querySelector("td:last-child");
+              const span = td.querySelector(".status-text");
+              const select = td.querySelector("select");
+
+              // Lấy option đang được chọn để hiển thị text
+              const selectedOption = select.options[select.selectedIndex];
+              span.classList.add("d-none");
+              select.classList.remove("d-none");
+            });
+
+            updateBtn.textContent = "Hoàn tất";
+
+            isEditing = true;
+          } else {
+            // Chuyển sang chế độ xem
+            rows.forEach((row) => {
+              const td = row.querySelector("td:last-child");
+              const span = td.querySelector(".status-text");
+              const select = td.querySelector("select");
+              const selectedOption = select.options[select.selectedIndex];
+
+              // Cập nhật class và text
+              span.textContent = selectedOption.textContent;
+              span.classList.remove("status-unpaid", "status-paid");
+              selectedOption.classList.forEach((cls) => {
+                if (cls.startsWith("status-")) {
+                  span.classList.add(cls);
+                }
+              });
+
+              select.classList.add("d-none");
+              span.classList.remove("d-none");
+            });
+
+            updateBtn.textContent = "Cập nhật trạng thái thanh toán";
+            isEditing = false;
+          }
+        });
+
+        // Gán giá trị mặc định vào <span> khi trang load
+        const rows = document.querySelectorAll("tbody tr");
+        rows.forEach((row) => {
+          const td = row.querySelector("td:last-child");
+          const span = td.querySelector(".status-text");
+          const select = td.querySelector("select");
+          const selectedOption = select.options[select.selectedIndex];
+          span.textContent = selectedOption.textContent;
+          selectedOption.classList.forEach((cls) => {
+            if (cls.startsWith("status-")) {
+              span.classList.add(cls);
+            }
+          });
+        });
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const selects = document.querySelectorAll("select.form-select");
+
+        selects.forEach((select) => {
+          const applySelectedClass = () => {
+            select.classList.remove("status-unpaid", "status-paid");
+
+            const selectedOption = select.options[select.selectedIndex];
+            selectedOption.classList.forEach((cls) => {
+              if (cls.startsWith("status-")) {
+                select.classList.add(cls);
+              }
+            });
+          };
+
+          applySelectedClass();
+          select.addEventListener("change", applySelectedClass);
+        });
+      });
+
+      document.querySelectorAll(".menu-button").forEach((button) => {
+        button.addEventListener("click", function () {
+          document
+            .querySelectorAll(".menu-button")
+            .forEach((btn) => btn.classList.remove("selected"));
+          this.classList.add("selected");
+        });
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

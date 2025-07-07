@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý lịch thi</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        background-color: #f8f9fc;
+        font-family: "Nunito Sans", sans-serif;
+      }
+      .sidebar {
+        height: 100vh;
+        background-color: white;
+        border-right: 1px solid #dee2e6;
+      }
+      .card-rounded {
+        border-radius: 1rem;
+      }
+      tr.selected {
+        background-color: #e2e6ff !important;
+        font-weight: bold;
+      }
+      button {
+        border-radius: 12px !important;
+        background-color: #6183ff !important;
+        color: white !important;
+        width: 114.12px !important;
+        height: 44.53px !important;
+      }
+      label {
+        font-size: 16px;
+      }
+      .custom-input {
+        background-color: #d5d5d5 !important;
+        color: #00000080 !important;
+        border: none;
+      }
+
+      .custom-input::placeholder {
+        color: #00000080;
+      }
+
+      .custom-input:focus {
+        background-color: #d5d5d5;
+        box-shadow: none;
+        outline: none;
+      }
+      .full {
+        color: #21d247;
+        font-size: 14px;
+      }
+      .opening {
+        color: #b3c022;
+        font-size: 14px;
+      }
+      .expired {
+        color: #cb0202;
+        font-size: 14px;
+      }
+      .menu-button {
+        background-color: white !important;
+        color: black !important;
+        border: none;
+      }
+
+      .menu-button.selected {
+        background-color: #4f75ff !important;
+        color: white !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar p-3">
+          <h4 class="fw-bold text-primary text-center">
+            Dash<span class="text-dark">Stack</span>
+          </h4>
+          <button
+            class="menu-button btn btn-primary w-100 text-start ps-1 mb-1"
+          >
+            <i class="bi bi-clock me-2 ms-3"></i>Quản lý kỳ thi
+          </button>
+          <button
+            class="menu-button btn btn-primary w-100 text-start ps-1 mb-1"
+          >
+            <i class="bi bi-border-all me-2 ms-3"></i>Xem phiếu đăng ký
+          </button>
+          <button
+            class="menu-button btn btn-primary w-100 text-start ps-1 mb-1 selected"
+          >
+            <i class="bi bi-suit-heart me-2 ms-3"></i>Phát hành phiếu dự thi
+          </button>
+          <button
+            class="menu-button btn btn-primary w-100 text-start ps-1 mb-1"
+          >
+            <i class="bi bi-chat-left me-2 ms-3"></i>Xem lịch thi
+          </button>
+          <button
+            class="menu-button btn btn-primary w-100 text-start ps-1 mb-1"
+          >
+            <i class="bi bi-list-check me-2 ms-3"></i>Tra cứu thông tin
+          </button>
+
+          <hr />
+          <button
+            class="menu-button btn btn-primary w-100 text-start ps-1 mb-1"
+          >
+            <i class="bi bi-power ms-2 me-3"></i>Logout
+          </button>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-md-10">
+          <div
+            class="d-flex align-items-center"
+            style="background-color: white; height: 81px"
+          >
+            <h3>Xin chào, nhân viên tiếp nhận</h3>
+          </div>
+          <div class="me-4 ms-4">
+            <h4 class="mt-3">Phát hành phiếu dự thi</h4>
+
+            <div class="row mt-4">
+              <!-- Danh sách lịch thi -->
+              <div class="col-md-12" id="schedule-list">
+                <div class="card card-rounded p-3">
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-3"
+                  >
+                    <h5 class="fw-bold">Phát hành phiếu dự thi</h5>
+                  </div>
+                  <table
+                    class="table table-bordered text-center"
+                    id="exam-table"
+                  >
+                    <thead>
+                      <tr>
+                        <th class="fs-6">Mã khách hàng</th>
+                        <th class="fs-6">Tên khách hàng</th>
+                        <th class="fs-6">Địa chỉ</th>
+                        <th class="fs-6">Số điện thoại</th>
+                        <th class="fs-6">Email</th>
+                        <th class="fs-6">Mã phiếu đăng ký</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr onclick="selectRow(this)">
+                        <td>001</td>
+                        <td>Nguyen Van A</td>
+                        <td>Nguyen Van Cu, Q5</td>
+                        <td>+847321141</td>
+                        <td>abc@gmail.com</td>
+                        <td>PH001</td>
+                      </tr>
+                      <tr onclick="selectRow(this)">
+                        <td>001</td>
+                        <td>Nguyen Van A</td>
+                        <td>Nguyen Van Cu, Q5</td>
+                        <td>+847321141</td>
+                        <td>abc@gmail.com</td>
+                        <td>PH001</td>
+                      </tr>
+                      <tr onclick="selectRow(this)">
+                        <td>001</td>
+                        <td>Nguyen Van A</td>
+                        <td>Nguyen Van Cu, Q5</td>
+                        <td>+847321141</td>
+                        <td>abc@gmail.com</td>
+                        <td>PH001</td>
+                      </tr>
+                      <tr onclick="selectRow(this)">
+                        <td>001</td>
+                        <td>Nguyen Van A</td>
+                        <td>Nguyen Van Cu, Q5</td>
+                        <td>+847321141</td>
+                        <td>abc@gmail.com</td>
+                        <td>PH001</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="d-flex justify-content-end">
+                    <button
+                      id="submit-selected"
+                      class="btn btn-primary btn-sm"
+                      style="width: 274px !important; height: 56px !important"
+                    >
+                      Phát hành phiếu thi
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      function selectRow(row) {
+        row.classList.toggle("selected");
+      }
+
+      document
+        .getElementById("submit-selected")
+        .addEventListener("click", () => {
+          const selected = document.querySelectorAll(
+            "#exam-table tbody tr.selected"
+          );
+          const selectedIds = Array.from(selected).map((row) => row.dataset.id);
+
+          if (selectedIds.length === 0) {
+            alert("Bạn chưa chọn dòng nào!");
+            return;
+          }
+
+          fetch("link1", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ ids: selectedIds }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              alert("Gửi thành công!");
+              console.log(data);
+            })
+            .catch((err) => {
+              alert("Có lỗi xảy ra.");
+              console.error(err);
+            });
+        });
+
+      document.querySelectorAll(".menu-button").forEach((button) => {
+        button.addEventListener("click", function () {
+          document
+            .querySelectorAll(".menu-button")
+            .forEach((btn) => btn.classList.remove("selected"));
+          this.classList.add("selected");
+        });
+      });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
