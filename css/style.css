@@ -1,0 +1,27 @@
+body {
+    font-family: sans-serif;
+}
+
+.sidebar {
+    width: 280px;
+}
+
+.sidebar .nav-link.active {
+    background-color: #e9ecef;
+    color: #0d6efd;
+}
+
+.sidebar .nav-link:not(.active):hover {
+    background-color: #f1f3f5;
+}
+
+.main-content {
+    background-color: #f8f9fa;
+}
+
+.btn-primary {
+    --bs-btn-bg: #4d6dff;
+    --bs-btn-border-color: #4d6dff;
+    --bs-btn-hover-bg: #3a5ae0;
+    --bs-btn-hover-border-color: #3a5ae0;
+}

@@ -1,4 +1,5 @@
 ## Chức năng
+
 1. tạo phiếu đăng ký 3 màn hình
 2. tạo phiếu dự thi 1 màn hình
 3. tạo lịch thi 1 màn hình
@@ -8,6 +9,7 @@
 7. Màn hình chính
 
 ## Phân công
+
 - Tài làm tạo phiếu đăng ký 3 màn hình, đăng nhập
 - Quý làm 2 3 4
 - Thư làm 5 với trang home
