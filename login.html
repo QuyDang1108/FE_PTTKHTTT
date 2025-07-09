@@ -65,30 +65,48 @@
       </div>
     </div>
 
-    <!-- Import config trước script chính -->
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Config -->
     <script src="js/config.js"></script>
+
     <script>
-      // Chuyển hướng nếu đã đăng nhập
       if (localStorage.getItem("isLoggedIn") === "true") {
         window.location.href = "dang-ky.html";
       }
 
-      document
-        .getElementById("loginForm")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-          const email = document.getElementById("email").value;
-          const password = document.getElementById("password").value;
-          const errorMessage = document.getElementById("error-message");
+      $("#loginForm").submit(function (e) {
+        e.preventDefault();
+        const email = $("#email").val();
+        const password = $("#password").val();
+        const errorMessage = $("#error-message");
 
-          // Sử dụng thông tin từ config thay vì hardcode
-          if (email === CONFIG.EMAIL && password === CONFIG.PASSWORD) {
-            localStorage.setItem("isLoggedIn", "true");
-            window.location.href = "dang-ky.html";
-          } else {
-            errorMessage.style.display = "block";
-          }
+        $.ajax({
+          url: "http://localhost:8080/api/v1/logins",
+          type: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({ email: email, password: password }),
+          success: function (res) {
+            // res chứa token và authentication
+            if (res.authentication && res.token) {
+              localStorage.setItem("token", res.token);
+              localStorage.setItem("isLoggedIn", "true");
+              localStorage.setItem("id", res.staffId);
+              window.location.href = "dang-ky.html";
+            } else {
+              errorMessage.text("Đăng nhập thất bại.").show();
+            }
+          },
+          error: function (xhr) {
+            let msg = "Email hoặc mật khẩu không đúng.";
+            if (xhr.status === 500) {
+              msg = "Lỗi hệ thống. Vui lòng thử lại sau.";
+            }
+            errorMessage.text(msg).show();
+          },
         });
+      });
     </script>
   </body>
 </html>
