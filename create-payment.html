@@ -40,24 +40,13 @@
         background-color: #4f75ff !important;
         color: white !important;
       }
-      button {
-        border-radius: 12px !important;
-        background-color: #6183ff !important;
-        color: white !important;
-        width: 114.12px !important;
-        height: 44.53px !important;
-      }
       .search-box {
-        background-color: #f8f9fc !important; /* Màu nền xanh nhạt */
+        background-color: #f8f9fc !important;
         border: 1px solid #ccc;
         padding: 8px 12px;
         border-radius: 14px;
-        color: #202224; /* Màu chữ */
+        color: #202224;
         width: 90%;
-      }
-      table td,
-      table th {
-        line-height: 40px;
       }
       .custom-select {
         width: 160px;
@@ -66,7 +55,7 @@
       }
       a {
         all: unset;
-        cursor: pointer; /* giữ lại con trỏ tay để biết có thể bấm */
+        cursor: pointer;
       }
     </style>
   </head>
@@ -85,10 +74,9 @@
             đăng ký
           </button>
           <button
-            class="menu-button selected btn btn-primary w-100 text-start ps-1 mb-1 selected"
+            class="menu-button selected btn btn-primary w-100 text-start ps-1 mb-1"
           >
-            <i class="bi bi-chat-left me-2 ms-3"></i>
-            Quản lý thanh toán
+            <i class="bi bi-chat-left me-2 ms-3"></i>Quản lý thanh toán
           </button>
           <hr />
           <button
@@ -100,7 +88,7 @@
           </button>
         </div>
 
-        <!-- Main content -->
+        <!-- Main Content -->
         <div class="col-md-10 p-0 m-0">
           <div
             class="d-flex align-items-center"
@@ -123,8 +111,8 @@
               <table class="table text-center">
                 <thead>
                   <tr>
-                    <th>Mã ĐK</th>
-                    <th>Tên ĐK</th>
+                    <th>Mã người đăng ký</th>
+                    <th>Tên người đăng ký</th>
                     <th>Địa chỉ</th>
                     <th>Số điện thoại</th>
                     <th>Email</th>
@@ -132,56 +120,13 @@
                     <th>Trạng thái</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td><a href="./create-payment2.html">00001</a></td>
-                    <td>Nguyen Van A</td>
-                    <td>Nguyen Van Cu, Q5</td>
-                    <td>+847321141</td>
-                    <td>abc@gmail.com</td>
-                    <td>PH0001</td>
-                    <td class="d-flex justify-content-center">
-                      <span class="status-text"></span>
-                      <select class="form-select custom-select d-none">
-                        <option class="status-unpaid">Chưa thanh toán</option>
-                        <option class="status-paid">Đã thanh toán</option>
-                      </select>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><a href="./create-payment2.html">00001</a></td>
-                    <td>Nguyen Van A</td>
-                    <td>Nguyen Van Cu, Q5</td>
-                    <td>+847321141</td>
-                    <td>abc@gmail.com</td>
-                    <td>PH0002</td>
-                    <td class="d-flex justify-content-center">
-                      <span class="status-text"></span>
-                      <select class="form-select custom-select d-none">
-                        <option class="status-unpaid">Chưa thanh toán</option>
-                        <option class="status-paid">Đã thanh toán</option>
-                      </select>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><a href="./create-payment2.html">00001</a></td>
-                    <td>Nguyen Van A</td>
-                    <td>Nguyen Van Cu, Q5</td>
-                    <td>+847321141</td>
-                    <td>abc@gmail.com</td>
-                    <td>PH0003</td>
-                    <td class="d-flex justify-content-center">
-                      <span class="status-text"></span>
-                      <select class="form-select custom-select d-none">
-                        <option class="status-unpaid">Chưa thanh toán</option>
-                        <option class="status-paid">Đã thanh toán</option>
-                      </select>
-                    </td>
-                  </tr>
+                <tbody id="regisTableBody">
+                  <!-- Data will be populated here -->
                 </tbody>
               </table>
               <div class="text-end">
                 <button
+                  id="saveBtn"
                   class="btn btn-primary btn-sm"
                   style="
                     width: 274px !important;
@@ -198,125 +143,174 @@
       </div>
     </div>
 
+    <!-- JS -->
+    <!-- Phần body không thay đổi, chỉ script -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const selects = document.querySelectorAll("select.form-select");
+      const API_URL = "http://localhost:8080/api/v1/regis";
+      let isEditing = false;
 
-        selects.forEach((select) => {
-          const applySelectedClass = () => {
-            select.classList.remove("status-unpaid", "status-paid");
-            const selectedOption = select.options[select.selectedIndex];
-            selectedOption.classList.forEach((cls) => {
-              if (cls.startsWith("status-")) {
-                select.classList.add(cls);
-              }
+      function loadRegisForms() {
+        $.ajax({
+          url: API_URL,
+          method: "GET",
+          success: function (response) {
+            const forms = response.data;
+
+            // Sắp xếp: chưa thanh toán trước, mới nhất trước
+            forms.sort((a, b) => {
+              const statusA = a.status === "Đã thanh toán" ? 1 : 0;
+              const statusB = b.status === "Đã thanh toán" ? 1 : 0;
+              const dateA = new Date(a.date);
+              const dateB = new Date(b.date);
+              return statusA - statusB || dateB - dateA;
             });
-          };
-          applySelectedClass();
-        });
 
-        // Logout
-        document
-          .getElementById("logout-link")
-          .addEventListener("click", function (e) {
-            e.preventDefault();
-            localStorage.removeItem("isLoggedIn");
-            window.location.href = "login.html";
+            const tbody = $("table tbody");
+            tbody.empty();
+
+            forms.forEach((form) => {
+              const statusText = form.status;
+              const isPaid = statusText === "Đã thanh toán";
+              const statusClass = isPaid ? "status-paid" : "status-unpaid";
+
+              const row = $(`
+            <tr data-id="${form.formId}">
+              <td><a href="./create-payment2.html">${form.formId}</a></td>
+              <td>${form.registrant.name}</td>
+              <td>${form.registrant.address}</td>
+              <td>${form.registrant.phone}</td>
+              <td>${form.registrant.email}</td>
+              <td>PH${String(form.formId).padStart(4, "0")}</td>
+              <td class="d-flex justify-content-center">
+                <span class="status-text ${statusClass}">${statusText}</span>
+                <select class="form-select custom-select d-none">
+                  <option value="Chưa thanh toán" class="status-unpaid" ${
+                    !isPaid ? "selected" : ""
+                  }>Chưa thanh toán</option>
+                  <option value="Đã thanh toán" class="status-paid" ${
+                    isPaid ? "selected" : ""
+                  }>Đã thanh toán</option>
+                </select>
+              </td>
+            </tr>
+          `);
+
+              tbody.append(row);
+            });
+
+            attachListeners();
+          },
+          error: function () {
+            alert("Không thể tải dữ liệu phiếu đăng ký.");
+          },
+        });
+      }
+
+      function attachListeners() {
+        $(".custom-select")
+          .off("change")
+          .on("change", function () {
+            const selectedOption = $(this).find("option:selected");
+            $(this)
+              .removeClass("status-unpaid status-paid")
+              .addClass(selectedOption.attr("class"));
           });
 
-        const updateBtn = document.querySelector(".btn.btn-primary.btn-sm");
-        let isEditing = false;
+        $(".menu-button")
+          .off("click")
+          .on("click", function () {
+            $(".menu-button").removeClass("selected");
+            $(this).addClass("selected");
+          });
+      }
 
-        updateBtn.addEventListener("click", function () {
-          const rows = document.querySelectorAll("tbody tr");
+      $(document).ready(function () {
+        loadRegisForms();
+
+        const updateBtn = $(".btn.btn-primary.btn-sm");
+
+        updateBtn.on("click", function () {
+          const rows = $("table tbody tr");
 
           if (!isEditing) {
-            // Chuyển sang chế độ cập nhật
-            rows.forEach((row) => {
-              const td = row.querySelector("td:last-child");
-              const span = td.querySelector(".status-text");
-              const select = td.querySelector("select");
-
-              // Lấy option đang được chọn để hiển thị text
-              const selectedOption = select.options[select.selectedIndex];
-              span.classList.add("d-none");
-              select.classList.remove("d-none");
+            // Bắt đầu chỉnh sửa
+            rows.each(function () {
+              const td = $(this).find("td").last();
+              td.find(".status-text").addClass("d-none");
+              td.find("select").removeClass("d-none");
             });
-
-            updateBtn.textContent = "Hoàn tất";
-
+            updateBtn.text("Hoàn tất");
             isEditing = true;
           } else {
-            // Chuyển sang chế độ xem
-            rows.forEach((row) => {
-              const td = row.querySelector("td:last-child");
-              const span = td.querySelector(".status-text");
-              const select = td.querySelector("select");
-              const selectedOption = select.options[select.selectedIndex];
+            const updateRequests = [];
+            const alertMessages = [];
 
-              // Cập nhật class và text
-              span.textContent = selectedOption.textContent;
-              span.classList.remove("status-unpaid", "status-paid");
-              selectedOption.classList.forEach((cls) => {
-                if (cls.startsWith("status-")) {
-                  span.classList.add(cls);
-                }
-              });
+            rows.each(function () {
+              const formId = $(this).data("id");
+              const td = $(this).find("td").last();
+              const span = td.find(".status-text");
+              const select = td.find("select");
 
-              select.classList.add("d-none");
-              span.classList.remove("d-none");
+              const originalStatus = span.text().trim(); // giữ nguyên text ban đầu
+              const newStatus = select.val().trim();
+
+              if (originalStatus !== newStatus) {
+                const url = `${API_URL}/${formId}/status?status=${encodeURIComponent(
+                  newStatus
+                )}`;
+
+                const req = $.ajax({
+                  url: url,
+                  method: "PUT",
+                  success: function (res) {
+                    if (res.message) alertMessages.push(res.message);
+                  },
+                  error: function (xhr) {
+                    const errMsg =
+                      xhr.responseJSON?.message || "Cập nhật thất bại!";
+                    alertMessages.push(errMsg);
+                  },
+                });
+
+                updateRequests.push(req);
+              }
             });
 
-            updateBtn.textContent = "Cập nhật trạng thái thanh toán";
-            isEditing = false;
+            // Nếu không có hàng nào thay đổi
+            if (updateRequests.length === 0) {
+              alert("Không có thay đổi nào.");
+              // Hoàn tác chế độ chỉnh sửa
+              rows.each(function () {
+                const td = $(this).find("td").last();
+                const span = td.find(".status-text");
+                const select = td.find("select");
+                select.addClass("d-none");
+                span.removeClass("d-none");
+              });
+              updateBtn.text("Cập nhật trạng thái thanh toán");
+              isEditing = false;
+              return;
+            }
+
+            // Sau khi cập nhật xong, hiển thị alert, đợi người dùng đóng xong thì load lại
+            $.when(...updateRequests).always(function () {
+              const finalMessage = alertMessages.join("\n") || "Đã cập nhật.";
+              alert(finalMessage);
+              loadRegisForms();
+              updateBtn.text("Cập nhật trạng thái thanh toán");
+              isEditing = false;
+            });
           }
         });
 
-        // Gán giá trị mặc định vào <span> khi trang load
-        const rows = document.querySelectorAll("tbody tr");
-        rows.forEach((row) => {
-          const td = row.querySelector("td:last-child");
-          const span = td.querySelector(".status-text");
-          const select = td.querySelector("select");
-          const selectedOption = select.options[select.selectedIndex];
-          span.textContent = selectedOption.textContent;
-          selectedOption.classList.forEach((cls) => {
-            if (cls.startsWith("status-")) {
-              span.classList.add(cls);
-            }
-          });
-        });
-      });
-
-      document.addEventListener("DOMContentLoaded", function () {
-        const selects = document.querySelectorAll("select.form-select");
-
-        selects.forEach((select) => {
-          const applySelectedClass = () => {
-            select.classList.remove("status-unpaid", "status-paid");
-
-            const selectedOption = select.options[select.selectedIndex];
-            selectedOption.classList.forEach((cls) => {
-              if (cls.startsWith("status-")) {
-                select.classList.add(cls);
-              }
-            });
-          };
-
-          applySelectedClass();
-          select.addEventListener("change", applySelectedClass);
-        });
-      });
-
-      document.querySelectorAll(".menu-button").forEach((button) => {
-        button.addEventListener("click", function () {
-          document
-            .querySelectorAll(".menu-button")
-            .forEach((btn) => btn.classList.remove("selected"));
-          this.classList.add("selected");
+        // Logout
+        $("#logout-link").on("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("isLoggedIn");
+          window.location.href = "login.html";
         });
       });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
