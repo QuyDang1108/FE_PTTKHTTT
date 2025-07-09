@@ -16,6 +16,7 @@
       href="https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap"
       rel="stylesheet"
     />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <style>
       body {
@@ -100,7 +101,9 @@
           <button
             class="menu-button btn btn-primary w-100 text-start ps-1 mb-1"
           >
-            <i class="bi bi-power ms-3 me-3"></i>Logout
+            <a id="logout-link" href="#"
+              ><i class="bi bi-power ms-3 me-3"></i>Logout</a
+            >
           </button>
         </div>
 
@@ -149,36 +152,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr onclick="selectRow(this)">
-                      <td>Tin học văn phòng</td>
-                      <td>Tin học</td>
-                      <td>22/03/2025</td>
-                      <td>08:00 AM</td>
-                      <td>P.317</td>
-                      <td>
-                        <span class="full">Đã đủ</span>
-                      </td>
-                    </tr>
-                    <tr onclick="selectRow(this)">
-                      <td>Tin học văn phòng</td>
-                      <td>Tin học</td>
-                      <td>22/03/2025</td>
-                      <td>08:00 AM</td>
-                      <td>P.317</td>
-                      <td>
-                        <span class="expired">Đã hết hạn</span>
-                      </td>
-                    </tr>
-                    <tr onclick="selectRow(this)">
-                      <td>Tin học văn phòng</td>
-                      <td>Tin học</td>
-                      <td>22/03/2025</td>
-                      <td>08:00 AM</td>
-                      <td>P.317</td>
-                      <td>
-                        <span class="opening">Đang mở</span>
-                      </td>
-                    </tr>
+                    <tr></tr>
                   </tbody>
                 </table>
               </div>
@@ -225,10 +199,10 @@
                     </div>
                     <div class="col-md-6 mb-3">
                       <label class="form-label fw-bold">Loại chứng chỉ</label>
-                      <select class="form-select custom-input" id="exam-type">
-                        <option>Ngoại ngữ</option>
-                        <option>Tin học</option>
-                      </select>
+                      <select
+                        class="form-select custom-input"
+                        id="exam-type"
+                      ></select>
                     </div>
                     <div class="col-md-6 mb-3">
                       <label class="form-label fw-bold"
@@ -283,6 +257,15 @@
     </div>
 
     <script>
+      // Logout
+      document
+        .getElementById("logout-link")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("isLoggedIn");
+          window.location.href = "login.html";
+        });
+
       let selectedRow = null;
 
       function selectRow(row) {
@@ -320,9 +303,20 @@
 
       function openEditForm() {
         if (!selectedRow) return alert("Vui lòng chọn một dòng để chỉnh sửa");
+
         const cells = selectedRow.querySelectorAll("td");
+
         document.getElementById("exam-name").value = cells[0].innerText;
-        document.getElementById("exam-type").value = cells[1].innerText;
+
+        const certificationOptions =
+          document.getElementById("exam-type").options;
+        for (let i = 0; i < certificationOptions.length; i++) {
+          if (certificationOptions[i].text === cells[1].innerText) {
+            certificationOptions[i].selected = true;
+            break;
+          }
+        }
+
         document.getElementById("exam-date").value = formatDate(
           cells[2].innerText
         );
@@ -330,6 +324,12 @@
           cells[3].innerText
         );
         document.getElementById("exam-room").value = cells[4].innerText;
+
+        const rowData = $(selectedRow).data("item");
+        if (rowData) {
+          document.getElementById("exam-limit").value = rowData.maxCount;
+        }
+
         document.getElementById("btn-submit").innerText = "Chỉnh sửa";
         document.getElementById("form-title").innerText = "Chỉnh sửa lịch thi";
         document.getElementById("form-container").classList.remove("d-none");
@@ -357,7 +357,141 @@
         if (meridian === "AM" && hours === "12") hours = "00";
         return `${hours}:${minutes}`;
       }
+
+      $(document).ready(function () {
+        $.ajax({
+          url: "http://localhost:8080/api/v1/certifications",
+          method: "GET",
+          contentType: "application/json",
+          success: function (data) {
+            const select = $("#exam-type");
+            select.empty();
+            if (Array.isArray(data) && data.length > 0) {
+              data.forEach(function (cert) {
+                const option = $("<option></option>")
+                  .val(cert.id)
+                  .text(cert.name);
+                select.append(option);
+              });
+            } else {
+              select.append("<option disabled>Không có chứng chỉ</option>");
+            }
+          },
+          error: function (err) {
+            console.error("Lỗi khi tải danh sách chứng chỉ:", err);
+            $("#exam-type").append(
+              "<option disabled>Không tải được dữ liệu</option>"
+            );
+          },
+        });
+
+        $.ajax({
+          url: "http://localhost:8080/api/v1/schedules",
+          method: "GET",
+          contentType: "application/json",
+          success: function (res) {
+            const tableBody = $("#exam-table tbody");
+            tableBody.empty();
+
+            if (res && Array.isArray(res.data)) {
+              res.data.forEach(function (item) {
+                let statusText = "";
+                let statusClass = "";
+                const today = new Date().toISOString().split("T")[0];
+                if (item.registrationCount >= item.maxCount) {
+                  statusText = "Đã đủ";
+                  statusClass = "full";
+                } else if (item.date < today) {
+                  statusText = "Đã hết hạn";
+                  statusClass = "expired";
+                } else {
+                  statusText = "Đang mở";
+                  statusClass = "opening";
+                }
+
+                const dateParts = item.date.split("-");
+                const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+                const formattedTime = item.time.substring(0, 5);
+
+                const row = $(`
+              <tr onclick="selectRow(this)">
+                <td>${item.nameTest}</td>
+                <td>${item.certificationName}</td>
+                <td>${formattedDate}</td>
+                <td>${formattedTime}</td>
+                <td>${item.room}</td>
+                <td><span class="${statusClass}">${statusText}</span></td>
+              </tr>
+            `);
+
+                row.data("item", item);
+                tableBody.append(row);
+              });
+            } else {
+              tableBody.append(
+                `<tr><td colspan="6">Không có dữ liệu</td></tr>`
+              );
+            }
+          },
+          error: function (err) {
+            console.error("Lỗi khi tải lịch thi:", err);
+            $("#exam-table tbody").append(
+              `<tr><td colspan="6">Tải dữ liệu thất bại</td></tr>`
+            );
+          },
+        });
+      });
+
+      $("#exam-form").submit(function (e) {
+        e.preventDefault();
+
+        const nameTest = $("#exam-name").val();
+        const certificationId = $("#exam-type").val();
+        const maxCount = $("#exam-limit").val();
+        const date = $("#exam-date").val();
+        const time = $("#exam-time").val();
+        const room = $("#exam-room").val();
+
+        const isEdit = $("#btn-submit").text().trim() === "Chỉnh sửa";
+
+        let id = null;
+        if (isEdit && selectedRow) {
+          const rowData = $(selectedRow).data("item");
+          if (rowData && rowData.id) {
+            id = rowData.id;
+          } else {
+            alert("Không thể xác định ID để cập nhật.");
+            return;
+          }
+        }
+
+        const data = {
+          id: id, // null nếu thêm mới
+          nameTest,
+          certificationId,
+          maxCount,
+          date,
+          time,
+          room,
+        };
+
+        $.ajax({
+          url: "http://localhost:8080/api/v1/schedules",
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify(data),
+          success: function () {
+            alert(isEdit ? "Cập nhật thành công" : "Thêm mới thành công");
+            location.reload();
+          },
+          error: function (err) {
+            console.error("Lỗi khi gửi dữ liệu:", err);
+            alert("Gửi dữ liệu thất bại");
+          },
+        });
+      });
     </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
