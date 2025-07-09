@@ -411,7 +411,17 @@
 
                 const dateParts = item.date.split("-");
                 const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
-                const formattedTime = item.time.substring(0, 5);
+                const timeParts = item.time.split(":");
+                let hour = parseInt(timeParts[0], 10);
+                let minute = timeParts[1];
+                const period = hour >= 12 ? "PM" : "AM";
+
+                // Chuyển sang 12h và định dạng có 2 chữ số
+                hour = hour % 12 || 12;
+                const paddedHour = hour.toString().padStart(2, "0");
+                const paddedMinute = minute.toString().padStart(2, "0");
+
+                const formattedTime = `${paddedHour}:${paddedMinute} ${period}`;
 
                 const row = $(`
               <tr onclick="selectRow(this)">
