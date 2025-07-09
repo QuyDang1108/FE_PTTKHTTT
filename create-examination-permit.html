@@ -16,6 +16,7 @@
       href="https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap"
       rel="stylesheet"
     />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <style>
       body {
@@ -49,11 +50,9 @@
         color: #00000080 !important;
         border: none;
       }
-
       .custom-input::placeholder {
         color: #00000080;
       }
-
       .custom-input:focus {
         background-color: #d5d5d5;
         box-shadow: none;
@@ -76,10 +75,13 @@
         color: black !important;
         border: none;
       }
-
       .menu-button.selected {
         background-color: #4f75ff !important;
         color: white !important;
+      }
+      a {
+        all: unset;
+        cursor: pointer;
       }
     </style>
   </head>
@@ -116,7 +118,6 @@
           >
             <i class="bi bi-list-check me-2 ms-3"></i>Tra cứu thông tin
           </button>
-
           <hr />
           <button
             class="menu-button btn btn-primary w-100 text-start ps-1 mb-1"
@@ -139,7 +140,6 @@
             <h4 class="mt-3">Phát hành phiếu dự thi</h4>
 
             <div class="row mt-4">
-              <!-- Danh sách lịch thi -->
               <div class="col-md-12" id="schedule-list">
                 <div class="card card-rounded p-3">
                   <div
@@ -153,8 +153,8 @@
                   >
                     <thead>
                       <tr>
-                        <th class="fs-6">Mã khách hàng</th>
-                        <th class="fs-6">Tên khách hàng</th>
+                        <th class="fs-6">Mã người dự thi</th>
+                        <th class="fs-6">Tên người dự thi</th>
                         <th class="fs-6">Địa chỉ</th>
                         <th class="fs-6">Số điện thoại</th>
                         <th class="fs-6">Email</th>
@@ -162,38 +162,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr onclick="selectRow(this)">
-                        <td>001</td>
-                        <td>Nguyen Van A</td>
-                        <td>Nguyen Van Cu, Q5</td>
-                        <td>+847321141</td>
-                        <td>abc@gmail.com</td>
-                        <td>PH001</td>
-                      </tr>
-                      <tr onclick="selectRow(this)">
-                        <td>001</td>
-                        <td>Nguyen Van A</td>
-                        <td>Nguyen Van Cu, Q5</td>
-                        <td>+847321141</td>
-                        <td>abc@gmail.com</td>
-                        <td>PH001</td>
-                      </tr>
-                      <tr onclick="selectRow(this)">
-                        <td>001</td>
-                        <td>Nguyen Van A</td>
-                        <td>Nguyen Van Cu, Q5</td>
-                        <td>+847321141</td>
-                        <td>abc@gmail.com</td>
-                        <td>PH001</td>
-                      </tr>
-                      <tr onclick="selectRow(this)">
-                        <td>001</td>
-                        <td>Nguyen Van A</td>
-                        <td>Nguyen Van Cu, Q5</td>
-                        <td>+847321141</td>
-                        <td>abc@gmail.com</td>
-                        <td>PH001</td>
-                      </tr>
+                      <!-- Dữ liệu sẽ được thêm vào đây -->
                     </tbody>
                   </table>
                   <div class="d-flex justify-content-end">
@@ -212,60 +181,109 @@
         </div>
       </div>
     </div>
+
+    <!-- SCRIPT -->
     <script>
-      // Logout
-      document
-        .getElementById("logout-link")
-        .addEventListener("click", function (e) {
+      $(document).ready(function () {
+        // Load danh sách thí sinh từ API
+        $.ajax({
+          url: "http://localhost:8080/api/v1/permits/list",
+          contentType: "application/json",
+          method: "GET",
+          success: function (response) {
+            if (response.code === 200 && Array.isArray(response.data)) {
+              const tbody = $("#exam-table tbody");
+              tbody.empty(); // Xóa dữ liệu cũ
+
+              response.data.forEach((candidate) => {
+                const row = $(`
+                  <tr data-id="${candidate.id}">
+                    <td>${candidate.id}</td>
+                    <td>${candidate.name}</td>
+                    <td>${candidate.address}</td>
+                    <td>${candidate.phone}</td>
+                    <td>${candidate.email}</td>
+                    <td>PH${String(candidate.regisId).padStart(3, "0")}</td>
+                  </tr>
+                `);
+
+                row.on("click", function () {
+                  $(this).toggleClass("selected");
+                });
+
+                tbody.append(row);
+              });
+            } else {
+              alert("Không có dữ liệu thí sinh.");
+            }
+          },
+          error: function () {
+            alert("Lỗi khi tải danh sách thí sinh.");
+          },
+        });
+
+        // Gửi danh sách đã chọn
+        $("#submit-selected").on("click", function () {
+          const selectedRows = $("#exam-table tbody tr.selected");
+
+          if (selectedRows.length === 0) {
+            alert("Bạn chưa chọn dòng nào!");
+            return;
+          }
+
+          const candidates = [];
+
+          selectedRows.each(function () {
+            const tds = $(this).find("td");
+            const id = parseInt($(this).data("id"));
+            const name = tds.eq(1).text();
+            const address = tds.eq(2).text();
+            const phone = tds.eq(3).text();
+            const email = tds.eq(4).text();
+            const regisCode = tds.eq(5).text(); // PH003
+            const regisId = parseInt(regisCode.replace("PH", ""));
+
+            candidates.push({
+              id: id,
+              name: name,
+              address: address,
+              phone: phone,
+              email: email,
+              dob: null,
+              regisId: regisId,
+              permitId: null,
+            });
+          });
+
+          $.ajax({
+            url: "http://localhost:8080/api/v1/permits/list",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(candidates),
+            success: function (res) {
+              alert("Tạo thành công " + res.data + " phiếu dự thi!");
+              location.reload();
+            },
+            error: function (xhr) {
+              console.error(xhr);
+              alert("Lỗi khi tạo phiếu dự thi.");
+            },
+          });
+        });
+
+        // Logout
+        $("#logout-link").on("click", function (e) {
           e.preventDefault();
           localStorage.removeItem("isLoggedIn");
           window.location.href = "login.html";
         });
 
-      function selectRow(row) {
-        row.classList.toggle("selected");
-      }
-
-      document
-        .getElementById("submit-selected")
-        .addEventListener("click", () => {
-          const selected = document.querySelectorAll(
-            "#exam-table tbody tr.selected"
-          );
-          const selectedIds = Array.from(selected).map((row) => row.dataset.id);
-
-          if (selectedIds.length === 0) {
-            alert("Bạn chưa chọn dòng nào!");
-            return;
-          }
-
-          fetch("link1", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ ids: selectedIds }),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              alert("Gửi thành công!");
-              console.log(data);
-            })
-            .catch((err) => {
-              alert("Có lỗi xảy ra.");
-              console.error(err);
-            });
-        });
-
-      document.querySelectorAll(".menu-button").forEach((button) => {
-        button.addEventListener("click", function () {
-          document
-            .querySelectorAll(".menu-button")
-            .forEach((btn) => btn.classList.remove("selected"));
-          this.classList.add("selected");
+        // Sidebar menu button
+        $(".menu-button").on("click", function () {
+          $(".menu-button").removeClass("selected");
+          $(this).addClass("selected");
         });
       });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
