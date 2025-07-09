@@ -329,6 +329,8 @@
         .addEventListener("click", function (e) {
           e.preventDefault();
           localStorage.removeItem("isLoggedIn");
+          localStorage.removeItem("id");
+          localStorage.removeItem("token");
           window.location.href = "login.html";
         });
 
@@ -362,12 +364,15 @@
           date: new Date().toISOString().split("T")[0],
           status: "Chưa thanh toán",
           candidates: [candidate],
-          staffId: 1,
+          staffId: localStorage.getItem("id"),
           testScheduleId: scheduleId,
         };
 
         $.ajax({
           url: "http://localhost:8080/api/v1/regis",
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
           type: "POST",
           contentType: "application/json",
           data: JSON.stringify(data),

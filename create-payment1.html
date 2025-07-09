@@ -465,6 +465,16 @@
 
     <!-- Script xử lý AJAX -->
     <script>
+      document
+        .getElementById("logout-link")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          localStorage.removeItem("isLoggedIn");
+          localStorage.removeItem("id");
+          localStorage.removeItem("token");
+          window.location.href = "login.html";
+        });
+
       const apiBase = "http://localhost:8080/api/v1";
       const formId = new URLSearchParams(window.location.search).get("formId");
       const staffId = localStorage.getItem("staffId") || 1;
@@ -478,6 +488,9 @@
           $.ajax({
             url: `${apiBase}/regis/${formId}`,
             method: "GET",
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
             success: function (response) {
               const data = response.data;
               globalRegisData = data;
@@ -568,6 +581,9 @@
             url: `${apiBase}/payments`,
             method: "POST",
             contentType: "application/json",
+            headers: {
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
             data: JSON.stringify({
               formId: formId,
               staffId: staffId,

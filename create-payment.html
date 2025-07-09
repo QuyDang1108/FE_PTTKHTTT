@@ -154,6 +154,9 @@
         $.ajax({
           url: API_URL,
           method: "GET",
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
           success: function (response) {
             let forms = response.data;
 
@@ -273,6 +276,9 @@
                 const req = $.ajax({
                   url: url,
                   method: "PUT",
+                  headers: {
+                    Authorization: "Bearer " + localStorage.getItem("token"),
+                  },
                   success: function (res) {
                     if (res.message) alertMessages.push(res.message);
                   },
@@ -305,11 +311,15 @@
         });
 
         // Logout
-        $("#logout-link").on("click", function (e) {
-          e.preventDefault();
-          localStorage.removeItem("isLoggedIn");
-          window.location.href = "login.html";
-        });
+        document
+          .getElementById("logout-link")
+          .addEventListener("click", function (e) {
+            e.preventDefault();
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("id");
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+          });
       });
     </script>
   </body>

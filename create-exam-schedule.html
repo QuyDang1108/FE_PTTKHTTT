@@ -263,10 +263,15 @@
         .addEventListener("click", function (e) {
           e.preventDefault();
           localStorage.removeItem("isLoggedIn");
+          localStorage.removeItem("id");
+          localStorage.removeItem("token");
           window.location.href = "login.html";
         });
 
       let selectedRow = null;
+
+      const token = localStorage.getItem("token");
+      const currentStaffId = localStorage.getItem("id");
 
       function selectRow(row) {
         document
@@ -363,6 +368,9 @@
           url: "http://localhost:8080/api/v1/certifications",
           method: "GET",
           contentType: "application/json",
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
           success: function (data) {
             const select = $("#exam-type");
             select.empty();
@@ -389,6 +397,9 @@
           url: "http://localhost:8080/api/v1/schedules",
           method: "GET",
           contentType: "application/json",
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
           success: function (res) {
             const tableBody = $("#exam-table tbody");
             tableBody.empty();
@@ -489,6 +500,9 @@
           url: "http://localhost:8080/api/v1/schedules",
           method: "POST",
           contentType: "application/json",
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
           data: JSON.stringify(data),
           success: function () {
             alert(isEdit ? "Cập nhật thành công" : "Thêm mới thành công");

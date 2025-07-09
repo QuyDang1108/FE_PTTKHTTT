@@ -93,7 +93,18 @@
               localStorage.setItem("token", res.token);
               localStorage.setItem("isLoggedIn", "true");
               localStorage.setItem("id", res.staffId);
-              window.location.href = "dang-ky.html";
+
+              switch (res.role) {
+                case "KE_TOAN":
+                  window.location.href = "create-payment.html";
+                  break;
+                case "TIEP_NHAN":
+                  window.location.href = "dang-ky.html";
+                  break;
+                case "QUAN_LY":
+                  window.location.href = "create-exam-schedule.html";
+                  break;
+              }
             } else {
               errorMessage.text("Đăng nhập thất bại.").show();
             }
