@@ -155,16 +155,10 @@
           url: API_URL,
           method: "GET",
           success: function (response) {
-            const forms = response.data;
+            let forms = response.data;
 
-            // Sắp xếp: chưa thanh toán trước, mới nhất trước
-            forms.sort((a, b) => {
-              const statusA = a.status === "Đã thanh toán" ? 1 : 0;
-              const statusB = b.status === "Đã thanh toán" ? 1 : 0;
-              const dateA = new Date(a.date);
-              const dateB = new Date(b.date);
-              return statusA - statusB || dateB - dateA;
-            });
+            // Lọc ra những phiếu đã thanh toán
+            forms = forms.filter((form) => form.status !== "Đã thanh toán");
 
             const tbody = $("table tbody");
             tbody.empty();
@@ -176,7 +170,9 @@
 
               const row = $(`
             <tr data-id="${form.formId}">
-              <td><a href="./create-payment2.html">${form.formId}</a></td>
+              <td><a href="./create-payment1.html?formId=${form.formId}">${
+                form.formId
+              }</a></td>
               <td>${form.registrant.name}</td>
               <td>${form.registrant.address}</td>
               <td>${form.registrant.phone}</td>
@@ -184,7 +180,7 @@
               <td>PH${String(form.formId).padStart(4, "0")}</td>
               <td class="d-flex justify-content-center">
                 <span class="status-text ${statusClass}">${statusText}</span>
-                <select class="form-select custom-select d-none">
+                <select class="form-select custom-select d-none ${statusClass}">
                   <option value="Chưa thanh toán" class="status-unpaid" ${
                     !isPaid ? "selected" : ""
                   }>Chưa thanh toán</option>
@@ -236,9 +232,12 @@
           if (!isEditing) {
             // Bắt đầu chỉnh sửa
             rows.each(function () {
-              const td = $(this).find("td").last();
-              td.find(".status-text").addClass("d-none");
-              td.find("select").removeClass("d-none");
+              const td = this.querySelector("td:last-child");
+              const span = td.querySelector(".status-text");
+              const select = td.querySelector("select");
+
+              span.classList.add("d-none");
+              select.classList.remove("d-none");
             });
             updateBtn.text("Hoàn tất");
             isEditing = true;
@@ -248,18 +247,29 @@
 
             rows.each(function () {
               const formId = $(this).data("id");
-              const td = $(this).find("td").last();
-              const span = td.find(".status-text");
-              const select = td.find("select");
+              const td = this.querySelector("td:last-child");
+              const span = td.querySelector(".status-text");
+              const select = td.querySelector("select");
+              const selectedOption = select.options[select.selectedIndex];
 
-              const originalStatus = span.text().trim(); // giữ nguyên text ban đầu
-              const newStatus = select.val().trim();
+              const originalStatus = span.textContent.trim();
+              const newStatus = selectedOption.textContent.trim();
+
+              span.textContent = newStatus;
+              span.classList.remove("status-unpaid", "status-paid");
+              selectedOption.classList.forEach((cls) => {
+                if (cls.startsWith("status-")) {
+                  span.classList.add(cls);
+                }
+              });
+
+              select.classList.add("d-none");
+              span.classList.remove("d-none");
 
               if (originalStatus !== newStatus) {
                 const url = `${API_URL}/${formId}/status?status=${encodeURIComponent(
                   newStatus
                 )}`;
-
                 const req = $.ajax({
                   url: url,
                   method: "PUT",
@@ -277,23 +287,13 @@
               }
             });
 
-            // Nếu không có hàng nào thay đổi
             if (updateRequests.length === 0) {
               alert("Không có thay đổi nào.");
-              // Hoàn tác chế độ chỉnh sửa
-              rows.each(function () {
-                const td = $(this).find("td").last();
-                const span = td.find(".status-text");
-                const select = td.find("select");
-                select.addClass("d-none");
-                span.removeClass("d-none");
-              });
               updateBtn.text("Cập nhật trạng thái thanh toán");
               isEditing = false;
               return;
             }
 
-            // Sau khi cập nhật xong, hiển thị alert, đợi người dùng đóng xong thì load lại
             $.when(...updateRequests).always(function () {
               const finalMessage = alertMessages.join("\n") || "Đã cập nhật.";
               alert(finalMessage);
