@@ -159,7 +159,7 @@
                 </select>
               </div>
               <div class="col-md-4">
-                <label class="form-label">Ngày thi</label>
+                <label class="form-label">Thời gian thi</label>
                 <select class="form-select" id="examDate">
                   <option value="">Chọn</option>
                 </select>
@@ -234,22 +234,38 @@
         data.forEach((item) => {
           uniqueRanks.add(item.certificationName);
           uniqueTests.add(item.nameTest);
-          const [y, m, d] = item.date.split("-");
-          uniqueDates.add(`${d}/${m}/${y}`);
+
+          const [year, month, day] = item.date.split("-");
+          const [hour, minute] = item.time.split(":");
+
+          // Tạo đối tượng Date
+          const dateObj = new Date(`${item.date}T${item.time}`);
+
+          // Format giờ AM/PM
+          const hours = dateObj.getHours();
+          const formattedHours = (((hours + 11) % 12) + 1)
+            .toString()
+            .padStart(2, "0");
+          const ampm = hours >= 12 ? "PM" : "AM";
+
+          const formattedTime = `${formattedHours}:${minute} ${ampm}`;
+          const formattedDate = `${day}/${month}/${year}`;
+
+          uniqueDates.add(`${formattedTime} ${formattedDate}`);
         });
 
-        fillSelect(rankSelect, Array.from(uniqueRanks));
-        fillSelect(testSelect, Array.from(uniqueTests));
-        fillSelect(dateSelect, Array.from(uniqueDates));
+        fillSelect(rankSelect, Array.from(uniqueRanks), "Chọn");
+        fillSelect(testSelect, Array.from(uniqueTests), "Chọn");
+        fillSelect(dateSelect, Array.from(uniqueDates), "Chọn");
       }
 
-      function fillSelect(select, items) {
-        select.innerHTML = `<option value="">Chọn</option>`;
+      function fillSelect(selectElement, items, placeholder) {
+        selectElement.innerHTML = `<option value="">${placeholder}</option>`;
         items.forEach((item) => {
           const opt = document.createElement("option");
           opt.value = item;
           opt.text = item;
-          select.appendChild(opt);
+          selectElement.appendChild(opt);
         });
       }
 
@@ -262,11 +278,26 @@
           const matchRank =
             !selectedRank || item.certificationName === selectedRank;
           const matchTest = !selectedTest || item.nameTest === selectedTest;
-          const dateStr = item.date.split("-").reverse().join("/");
-          const matchDate = !selectedDate || dateStr === selectedDate;
+
+          // Format ngày giờ về: HH:mm AM/PM DD/MM/YYYY
+          const dateObj = new Date(`${item.date}T${item.time}`);
+          const hours = dateObj.getHours();
+          const minutes = dateObj.getMinutes().toString().padStart(2, "0");
+          const formattedHours = (((hours + 11) % 12) + 1)
+            .toString()
+            .padStart(2, "0");
+          const ampm = hours >= 12 ? "PM" : "AM";
+          const day = dateObj.getDate().toString().padStart(2, "0");
+          const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+          const year = dateObj.getFullYear();
+
+          const fullDateTime = `${formattedHours}:${minutes} ${ampm} ${day}/${month}/${year}`;
+          const matchDate = !selectedDate || fullDateTime === selectedDate;
+
           return matchRank && matchTest && matchDate;
         });
 
+        // Cập nhật lại từng select nếu không phải source
         if (source !== "rank") {
           const ranks = [...new Set(filtered.map((i) => i.certificationName))];
           fillSelect(rankSelect, ranks, "Chọn");
@@ -282,9 +313,23 @@
         if (source !== "date") {
           const dates = [
             ...new Set(
-              filtered.map((i) => {
-                const [y, m, d] = i.date.split("-");
-                return `${d}/${m}/${y}`;
+              filtered.map((item) => {
+                const dateObj = new Date(`${item.date}T${item.time}`);
+                const hours = dateObj.getHours();
+                const minutes = dateObj
+                  .getMinutes()
+                  .toString()
+                  .padStart(2, "0");
+                const formattedHours = (((hours + 11) % 12) + 1)
+                  .toString()
+                  .padStart(2, "0");
+                const ampm = hours >= 12 ? "PM" : "AM";
+                const day = dateObj.getDate().toString().padStart(2, "0");
+                const month = (dateObj.getMonth() + 1)
+                  .toString()
+                  .padStart(2, "0");
+                const year = dateObj.getFullYear();
+                return `${formattedHours}:${minutes} ${ampm} ${day}/${month}/${year}`;
               })
             ),
           ];
@@ -294,16 +339,31 @@
       }
 
       function getSelectedScheduleId() {
-        const rank = rankSelect.value;
-        const test = testSelect.value;
-        const date = dateSelect.value;
+        const selectedRank = rankSelect.value;
+        const selectedTest = testSelect.value;
+        const selectedDate = dateSelect.value;
+
+        if (!selectedRank || !selectedTest || !selectedDate) return null;
 
         const found = scheduleList.find((item) => {
-          const formatted = item.date.split("-").reverse().join("/");
+          // Format lại ngày giờ giống với selectedDate
+          const dateObj = new Date(`${item.date}T${item.time}`);
+          const hours = dateObj.getHours();
+          const minutes = dateObj.getMinutes().toString().padStart(2, "0");
+          const formattedHours = (((hours + 11) % 12) + 1)
+            .toString()
+            .padStart(2, "0");
+          const ampm = hours >= 12 ? "PM" : "AM";
+          const day = dateObj.getDate().toString().padStart(2, "0");
+          const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+          const year = dateObj.getFullYear();
+
+          const fullDateTime = `${formattedHours}:${minutes} ${ampm} ${day}/${month}/${year}`;
+
           return (
-            item.certificationName === rank &&
-            item.nameTest === test &&
-            formatted === date
+            item.certificationName === selectedRank &&
+            item.nameTest === selectedTest &&
+            fullDateTime === selectedDate
           );
         });
 
